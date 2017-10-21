@@ -1,0 +1,32 @@
+{
+  "name": "microauth-google",
+  "version": "0.0.1",
+  "description": "Google oauth for micro",
+  "main": "index.js",
+  "scripts": {
+    "start": "micro example.js",
+    "test": "xo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rapzo/microauth-google.git"
+  },
+  "author": "Rui Lima",
+  "license": "MIT",
+  "dependencies": {
+    "googleapis": "^22.2.0",
+    "micro-redirect": "^1.0.0",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^2.6.0",
+    "xo": "^0.18.2"
+  },
+  "peerDependencies": {
+    "micro": "^8.0.0"
+  },
+  "xo": {
+    "spaces": 2,
+    "extends": "prettier"
+  }
+}
