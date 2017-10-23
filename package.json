@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rapzo/microauth-google.git"
+    "url": "https://github.com/microauth/microauth-google.git"
   },
   "author": "Rui Lima",
   "license": "MIT",

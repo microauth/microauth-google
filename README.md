@@ -2,9 +2,9 @@
 
 > Google oauth for [micro](https://github.com/zeit/micro/)
 
-[![Build Status](https://travis-ci.org/rapzo/microauth-google.svg?branch=master)](https://travis-ci.org/rapzo/microauth-google)
+[![Build Status](https://travis-ci.org/microauth/microauth-google.svg?branch=master)](https://travis-ci.org/microauth/microauth-google)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
-[![Greenkeeper badge](https://badges.greenkeeper.io/rapzo/microauth-google.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/microauth/microauth-google.svg)](https://greenkeeper.io/)
 
 Add [google](https://google.com) authentication to your [micro](https://github.com/zeit/micro/) in few lines of code.
 
@@ -66,4 +66,4 @@ micro app.js
 Now visit `http://localhost:3000/auth/google`
 
 ## Author
-[Rui Pedro Lima](http://12feettallstudio.com)
+[Rui Pedro Lima](https://github.com/rapzo)
