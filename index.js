@@ -45,8 +45,8 @@ const microAuthGoogle = ({
   scopes = DEFAULT_SCOPES.concat(scopes).reduce((scopes, scope) => {
     if (scopes.includes(scope)) return scopes
     scopes.push(scope)
-    return scope
-  })
+    return scopes
+  }, [])
 
   return fn => async (req, res, ...args) => {
     const {pathname, query} = url.parse(req.url)
