@@ -1,113 +1,105 @@
-'use strict'
+const assert = require("assert");
+const querystring = require("querystring");
+const {URL} = require("url");
+const uuid = require("uuid");
+const redirect = require("micro-redirect");
+const { OAuth2Client } = require("google-auth-library");
 
-const querystring = require('querystring')
-const url = require('url')
-const google = require('googleapis')
-const uuid = require('uuid')
-const redirect = require('micro-redirect')
-
-const provider = 'google';
-const {OAuth2} = google.auth
-const plus = google.plus('v1')
-const DEFAULT_SCOPES = [
-  'https://www.googleapis.com/auth/plus.me'
-]
-
-const getToken = (oauth2Client, code) => new Promise((resolve, reject) => {
-  oauth2Client.getToken(code, (err, tokens) => {
-    if (err) return reject(err)
-
-    oauth2Client.setCredentials(tokens)
-
-    resolve(tokens)
-  })
-})
-
-const getUser = oauth2Client => new Promise((resolve, reject) => {
-  plus.people.get({userId: 'me', auth: oauth2Client}, (err, response) => {
-    if (err) return reject(err)
-
-    resolve(response)
-  })
-})
+const provider = "google";
+/**
+ * OpenID 2.0 compliance:
+ * https://developers.google.com/identity/protocols/OpenIDConnect?hl=en#discovery
+ */
+const SCOPES = ["openid", "email", "profile"];
+const USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
 const microAuthGoogle = ({
   clientId,
   clientSecret,
-  callbackUrl,
-  path,
+  callbackUrl = "/callback",
+  path = "/",
   scopes = [],
-  accessType = 'offline'
+  accessType = "offline"
 }) => {
-  const states = [];
-  const oauth2Client = new OAuth2(clientId, clientSecret, callbackUrl)
+  assert(clientId, "Must provide a clientId.");
+  assert(clientSecret, "Must provide a clientSecret.");
+  assert(callbackUrl, "Must provide a callbackUrl.");
+  assert(path, "Must provide an url path.");
+  assert.notStrictEqual(path, callbackUrl, "Path cannot be the same as callbackUrl");
 
-  scopes = DEFAULT_SCOPES.concat(scopes).reduce((scopes, scope) => {
-    if (!scopes.includes(scope)) scopes.push(scope)
-    return scopes
-  }, [])
+  const client = new OAuth2Client(clientId, clientSecret, callbackUrl);
+  const scope = [...(new Set(SCOPES.concat(scopes)))];
+  const states = [];
 
   return fn => async (req, res, ...args) => {
-    const {pathname, query} = url.parse(req.url)
+    const { pathname, query } = new URL(req.url);
 
     if (pathname === path) {
       try {
-        const state = uuid.v4()
-        states.push(state)
+        const state = uuid.v4();
 
-        const redirectUrl = oauth2Client.generateAuthUrl({
+        states.push(state);
+
+        const redirectUrl = client.generateAuthUrl({
           // eslint-disable-next-line camelcase
           access_type: accessType,
-          scope: scopes,
+          scope,
           state
-        })
+        });
 
-        return redirect(res, 302, redirectUrl)
-      } catch (err) {
-        args.push({err, provider})
-        return fn(req, res, ...args)
+        return redirect(res, 302, redirectUrl);
+      } catch (error) {
+        args.push({ error, provider });
+
+        return fn(req, res, ...args);
       }
     }
 
-    const callbackPath = url.parse(callbackUrl).pathname
+    const callbackPath = new URL(callbackUrl).pathname;
     if (pathname === callbackPath) {
       try {
-        const {state, code} = querystring.parse(query)
+        const { state, code } = querystring.parse(query);
 
         if (!states.includes(state)) {
-          const err = new Error('Invalid state')
-          args.push({err, provider})
-          return fn(req, res, ...args)
-        }
-
-        states.splice(states.indexOf(state), 1)
-
-        const tokens = await getToken(oauth2Client, code)
-
-        if (tokens.error) {
-          args.push({err: tokens.error, provider});
+          const error = new Error("Invalid state");
+          args.push({ error, provider });
           return fn(req, res, ...args);
         }
 
-        const user = await getUser(oauth2Client)
-        const result = {
-          provider,
-          accessToken: tokens.access_token,
-          info: user,
-          tokens
+        states.splice(states.indexOf(state), 1);
+
+        const { tokens, error } = await client.getToken(code);
+
+        if (error) {
+          args.push({ error, provider });
+
+          return fn(req, res, ...args);
         }
 
-        args.push({result})
+        client.setCredentials(tokens);
 
-        return fn(req, res, ...args)
-      } catch (err) {
-        args.push({err, provider})
-        return fn(req, res, ...args)
+        const { data } = await client.requestAsync({
+          url: USERINFO_URL
+        });
+
+        const result = {
+          provider,
+          info: data,
+          client
+        };
+
+        args.push({ result });
+
+        return fn(req, res, ...args);
+      } catch (error) {
+        args.push({ error, provider });
+
+        return fn(req, res, ...args);
       }
     }
 
-    return fn(req, res, ...args)
-  }
-}
+    return fn(req, res, ...args);
+  };
+};
 
-module.exports = microAuthGoogle
+module.exports = microAuthGoogle;
