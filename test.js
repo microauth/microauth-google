@@ -41,7 +41,7 @@ test('should fail if path is not supplied', t => {
     microAuthGoogle({
       clientId: 'foo',
       clientSecret: 'bar',
-      callbackUrl: 'baz',
+      callbackUrl: 'http://localhost:3000/callback',
       path: null
     });
   }, {
@@ -54,11 +54,11 @@ test('should fail if path is the same as callbackUrl', t => {
     microAuthGoogle({
       clientId: 'foo',
       clientSecret: 'bar',
-      callbackUrl: 'baz',
-      path: 'baz'
+      callbackUrl: 'http://localhost:3000/',
+      path: '/'
     });
   }, {
-    message: /Path cannot be the same as callbackUrl/
+    message: /Service path cannot be the same as callback path/
   });
 });
 
@@ -66,8 +66,7 @@ test('should return a valid micro service', t => {
   const service = microAuthGoogle({
     clientId: 'foo',
     clientSecret: 'bar',
-    callbackUrl: 'baz',
-    path: 'bat'
+    callbackUrl: 'http://localhost:3000/callback',
   });
 
   t.is(typeof service, 'function');

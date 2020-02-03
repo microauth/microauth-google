@@ -29,7 +29,10 @@ const microAuthGoogle = ({
   assert(protocol, "Not a valid protocol in the callbackUrl string.");
   assert(host, "Not a valid host in the callbackUrl string.");
   assert(pathname, "Not a valid path in the callbackUrl string.");
-  assert.notStrictEqual(path, pathname, "Service path cannot be the same as callback path");
+  assert(
+    path !== pathname,
+    "Service path cannot be the same as callback path."
+  );
 
   const client = new OAuth2Client(clientId, clientSecret, callbackUrl);
   const scope = [...(new Set(SCOPES.concat(scopes)))];
@@ -61,7 +64,7 @@ const microAuthGoogle = ({
 
     if (url.pathname === pathname) {
       try {
-        const { state, code } = querystring.parse(url.search.substr(1));
+        const { state, code } = querystring.parse(url.search.slice(1));
 
         if (!states.includes(state)) {
           const error = new Error("Invalid state");
