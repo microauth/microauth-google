@@ -1,6 +1,5 @@
 const assert = require("assert");
 const querystring = require("querystring");
-const {URL} = require("url");
 const uuid = require("uuid");
 const redirect = require("micro-redirect");
 const { OAuth2Client } = require("google-auth-library");
@@ -16,7 +15,7 @@ const USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 const microAuthGoogle = ({
   clientId,
   clientSecret,
-  callbackUrl = "/callback",
+  callbackUrl,
   path = "/",
   scopes = [],
   accessType = "offline"
@@ -25,16 +24,21 @@ const microAuthGoogle = ({
   assert(clientSecret, "Must provide a clientSecret.");
   assert(callbackUrl, "Must provide a callbackUrl.");
   assert(path, "Must provide an url path.");
-  assert.notStrictEqual(path, callbackUrl, "Path cannot be the same as callbackUrl");
+
+  const { host, protocol, pathname } = new URL(callbackUrl);
+  assert(protocol, "Not a valid protocol in the callbackUrl string.");
+  assert(host, "Not a valid host in the callbackUrl string.");
+  assert(pathname, "Not a valid path in the callbackUrl string.");
+  assert.notStrictEqual(path, pathname, "Service path cannot be the same as callback path");
 
   const client = new OAuth2Client(clientId, clientSecret, callbackUrl);
   const scope = [...(new Set(SCOPES.concat(scopes)))];
   const states = [];
 
   return fn => async (req, res, ...args) => {
-    const { pathname, query } = new URL(req.url);
+    const url = new URL(`${protocol}//${host}${req.url}`);
 
-    if (pathname === path) {
+    if (url.pathname === path) {
       try {
         const state = uuid.v4();
 
@@ -55,10 +59,9 @@ const microAuthGoogle = ({
       }
     }
 
-    const callbackPath = new URL(callbackUrl).pathname;
-    if (pathname === callbackPath) {
+    if (url.pathname === pathname) {
       try {
-        const { state, code } = querystring.parse(query);
+        const { state, code } = querystring.parse(url.search.substr(1));
 
         if (!states.includes(state)) {
           const error = new Error("Invalid state");
