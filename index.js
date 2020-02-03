@@ -35,11 +35,19 @@ const microAuthGoogle = ({
   );
 
   const client = new OAuth2Client(clientId, clientSecret, callbackUrl);
-  const scope = [...(new Set(SCOPES.concat(scopes)))];
+  const scope = [...new Set(SCOPES.concat(scopes))];
   const states = [];
 
   return fn => async (req, res, ...args) => {
-    const url = new URL(`${protocol}//${host}${req.url}`);
+    let url;
+
+    try {
+      url = new URL(`${protocol}//${host}${req.url}`);
+    } catch (err) {
+      args.push({ err, provider });
+
+      return fn(req, res, ...args);
+    }
 
     if (url.pathname === path) {
       try {
@@ -55,8 +63,8 @@ const microAuthGoogle = ({
         });
 
         return redirect(res, 302, redirectUrl);
-      } catch (error) {
-        args.push({ error, provider });
+      } catch (err) {
+        args.push({ err, provider });
 
         return fn(req, res, ...args);
       }
@@ -67,8 +75,10 @@ const microAuthGoogle = ({
         const { state, code } = querystring.parse(url.search.slice(1));
 
         if (!states.includes(state)) {
-          const error = new Error("Invalid state");
-          args.push({ error, provider });
+          const err = new Error("Invalid state");
+
+          args.push({ err, provider });
+
           return fn(req, res, ...args);
         }
 
@@ -77,7 +87,7 @@ const microAuthGoogle = ({
         const { tokens, error } = await client.getToken(code);
 
         if (error) {
-          args.push({ error, provider });
+          args.push({ err: error, provider });
 
           return fn(req, res, ...args);
         }
@@ -97,8 +107,8 @@ const microAuthGoogle = ({
         args.push({ result });
 
         return fn(req, res, ...args);
-      } catch (error) {
-        args.push({ error, provider });
+      } catch (err) {
+        args.push({ err, provider });
 
         return fn(req, res, ...args);
       }

@@ -1,12 +1,13 @@
 {
   "name": "microauth-google",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "description": "Google oauth for micro",
   "main": "index.js",
   "scripts": {
     "start": "env $(cat .env) npx micro-dev example.js",
     "test": "xo && ava",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test"
+    "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test",
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
@@ -27,14 +28,18 @@
     "micro-dev": "^3.0.0",
     "nyc": "^15.0.0",
     "sinon": "^8.1.1",
-    "xo": "^0.25.0"
+    "xo": "^0.25.0",
+    "semantic-release": "^17.0.2"
   },
   "peerDependencies": {
     "micro": "^9.3.0"
   },
   "xo": {
     "spaces": 2,
-    "extends": "prettier"
+    "extends": "prettier",
+    "rules": {
+      "unicorn/catch-error-name": 0
+    }
   },
   "engines": {
     "node": ">= 10"
