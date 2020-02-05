@@ -17,7 +17,6 @@ module.exports = googleAuth(async (req, res, auth) => {
   }
 
   if (auth.err) {
-    // eslint-disable-next-line
     console.error(auth.err);
     return send(res, 403, "Forbidden");
   }

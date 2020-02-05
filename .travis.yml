@@ -6,5 +6,4 @@ cache:
   directories:
     - $HOME/.npm
     - node_modules
-before_script:
-  yarn add micro -P
+
