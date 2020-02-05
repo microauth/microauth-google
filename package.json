@@ -1,6 +1,6 @@
 {
   "name": "microauth-google",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Google oauth for micro",
   "main": "index.js",
   "scripts": {
