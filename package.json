@@ -4,8 +4,9 @@
   "description": "Google oauth for micro",
   "main": "index.js",
   "scripts": {
-    "start": "micro example.js",
-    "test": "xo"
+    "start": "env $(cat .env) npx micro-dev example.js",
+    "test": "xo && ava",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test"
   },
   "repository": {
     "type": "git",
@@ -14,19 +15,30 @@
   "author": "Rui Lima",
   "license": "MIT",
   "dependencies": {
-    "googleapis": "^22.2.0",
-    "micro-redirect": "^1.0.0",
+    "google-auth-library": "^5.9.2",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "eslint-config-prettier": "^2.6.0",
-    "xo": "^0.18.2"
+    "ava": "^3.1.0",
+    "eslint-config-node": "^4.0.0",
+    "eslint-config-prettier": "^6.0.0",
+    "micro": "^9.3.4",
+    "micro-dev": "^3.0.0",
+    "nyc": "^15.0.0",
+    "sinon": "^8.1.1",
+    "xo": "^0.25.0"
   },
   "peerDependencies": {
-    "micro": "^8.0.0"
+    "micro": "^9.3.0"
   },
   "xo": {
     "spaces": 2,
-    "extends": "prettier"
+    "extends": "prettier",
+    "rules": {
+      "unicorn/catch-error-name": 0
+    }
+  },
+  "engines": {
+    "node": ">= 10"
   }
 }
