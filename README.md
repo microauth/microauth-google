@@ -40,7 +40,7 @@ const googleAuth = microAuthGoogle(options);
 //  provider: 'google',
 //  accessToken: 'blahblah',
 //  info: userInfo,
-//  tokens: {Object with needed tokens to reuse with Google's OAuth2 instance}
+//  client: OAuth2Client instance
 // }}
 module.exports = googleAuth(async (req, res, auth) => {
 
@@ -53,7 +53,7 @@ module.exports = googleAuth(async (req, res, auth) => {
     return send(res, 403, 'Forbidden');
   }
 
-  return `Hello ${auth.result.info.displayName}`;
+  return `Hello ${auth.result.info.display_name}`;
 });
 
 ```
@@ -64,6 +64,21 @@ micro app.js
 ```
 
 Now visit `http://localhost:3000/auth/google`
+
+### Scopes
+
+**String|String[]**
+Scopes define the access list the app needs. It can either be a string or an array of strings.
+Default scopes and **always** present are the mandatory from [OpenID 2.0](https://developers.google.com/identity/protocols/OpenIDConnect?hl=en#discovery):
+- `openid`
+- `email`
+- `profile`
+
+### OAuth2Client
+
+**OAuth2Client**
+An instance of **OAuth2Client** is supplied for further use, mainly because this module no longer relies on `googleapis` nor it has as dependecy.
+
 
 ## Author
 [Rui Pedro Lima](https://github.com/rapzo)

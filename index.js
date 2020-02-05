@@ -1,8 +1,13 @@
 const assert = require("assert");
 const querystring = require("querystring");
 const uuid = require("uuid");
-const redirect = require("micro-redirect");
 const { OAuth2Client } = require("google-auth-library");
+
+const redirect = async (res, location) => {
+  res.statusCode = 307;
+  res.setHeader("Location", location);
+  res.end();
+};
 
 const provider = "google";
 /**
@@ -62,7 +67,7 @@ const microAuthGoogle = ({
           state
         });
 
-        return redirect(res, 302, redirectUrl);
+        return redirect(res, redirectUrl);
       } catch (err) {
         args.push({ err, provider });
 
